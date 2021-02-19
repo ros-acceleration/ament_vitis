@@ -145,7 +145,7 @@ macro(vitis_acceleration_kernel_aux)
   list(APPEND CMD " " ${CMAKE_SOURCE_DIR} "/" ${VITIS_KERNEL_AUX_FILE})
   list(APPEND CMD " -o " ${CMAKE_BINARY_DIR} "/" ${VITIS_KERNEL_AUX_NAME} ".xo")
 
-  debug()
+  # debug()
 
   # CMake configure time
   # Build
