@@ -198,21 +198,23 @@ macro(vitis_acceleration_kernel_aux)
   endif()  # package
 
   # install
-  install(
-    FILES
-      "${CMAKE_BINARY_DIR}/${BINARY_NAME}"
-    DESTINATION
-      lib/${PROJECT_NAME}
-  )
-  if (${VITIS_KERNEL_AUX_PACKAGE})
+  if (EXISTS ${CMAKE_BINARY_DIR}/${BINARY_NAME})
     install(
-      DIRECTORY
-        "${CMAKE_BINARY_DIR}/package"
+      FILES
+        "${CMAKE_BINARY_DIR}/${BINARY_NAME}"
       DESTINATION
         lib/${PROJECT_NAME}
     )
-  endif()
-
+    if (${VITIS_KERNEL_AUX_PACKAGE})
+      install(
+        DIRECTORY
+          "${CMAKE_BINARY_DIR}/package"
+        DESTINATION
+          lib/${PROJECT_NAME}
+      )
+    endif()
+  endif()  # install
+  
   if (NOT ${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw")
     execute_process(
       COMMAND
