@@ -20,6 +20,7 @@ foreach(filename
   "vivado_path"
   "hls_path"
   "platform_repo_paths"
+  "firmware_data_path"
 )
   include(${ament_vitis_DIR}/${filename}.cmake)
 endforeach()

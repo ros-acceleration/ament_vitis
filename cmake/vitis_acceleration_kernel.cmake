@@ -207,6 +207,8 @@ macro(vitis_acceleration_kernel_aux)
       DESTINATION
         lib/${PROJECT_NAME}
     )
+
+    # package installation
     if (${VITIS_KERNEL_AUX_PACKAGE})
       install(
         DIRECTORY
@@ -214,9 +216,28 @@ macro(vitis_acceleration_kernel_aux)
         DESTINATION
           lib/${PROJECT_NAME}
       )
-    endif()
+
+      # if hw_emu, symlink to "sim" folder
+      if (${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw_emu")
+        execute_process(
+          COMMAND
+            ln -s ${CMAKE_BINARY_DIR}/package/sim ${FIRMWARE_DATA}/../emulation/sim
+        )
+      endif()  # hw_emu
+    endif()  # package installation
+
+    # if sw_emu, deploy "data" from firmware
+    if (${VITIS_KERNEL_AUX_TYPE} STREQUAL "sw_emu")
+      install(
+        DIRECTORY
+          "${FIRMWARE_DATA}"
+        DESTINATION
+          lib/${PROJECT_NAME}
+      )
+    endif()  # sw_emu
   endif()  # install
 
+  # cleanup symlink for packaging
   if (NOT ${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw")
     execute_process(
       COMMAND

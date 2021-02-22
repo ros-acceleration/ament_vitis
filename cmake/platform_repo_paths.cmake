@@ -8,7 +8,7 @@
 #  \   \  /  \
 #   \___\/\___\
 #
-# defines the path to the Vitis HLS directory
+# defines the path to the PLATFORM_REPO_PATHS env. variable
 
 if(DEFINED ENV{PLATFORM_REPO_PATHS})
   set(PLATFORM_REPO_PATHS $ENV{PLATFORM_REPO_PATHS})
