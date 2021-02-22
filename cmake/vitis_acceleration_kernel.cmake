@@ -52,43 +52,45 @@ macro(vitis_acceleration_kernel)
     cmake_parse_arguments(VITIS_KERNEL "${options}" "${oneValueArgs}"
                           "${multiValueArgs}" ${ARGN} )
 
-    # debug()
-
-    foreach(type ${VITIS_KERNEL_TYPE})
-      if (${type} STREQUAL "sw_emu")
-        vitis_acceleration_kernel_aux(
-          NAME ${VITIS_KERNEL_NAME}
-          FILE ${VITIS_KERNEL_FILE}
-          TYPE "sw_emu"
-          CONFIG ${VITIS_KERNEL_CONFIG}
-          INCLUDE ${VITIS_KERNEL_INCLUDE}
-          PACKAGE ${VITIS_KERNEL_PACKAGE}
-        )
-      elseif (${type} STREQUAL "hw_emu")
-        vitis_acceleration_kernel_aux(
-          NAME ${VITIS_KERNEL_NAME}
-          FILE ${VITIS_KERNEL_FILE}
-          TYPE "hw_emu"
-          CONFIG ${VITIS_KERNEL_CONFIG}
-          INCLUDE ${VITIS_KERNEL_INCLUDE}
-          PACKAGE ${VITIS_KERNEL_PACKAGE}
-        )
-      elseif (${type} STREQUAL "hw")
-        vitis_acceleration_kernel_aux(
-          NAME ${VITIS_KERNEL_NAME}
-          FILE ${VITIS_KERNEL_FILE}
-          TYPE "hw"
-          CONFIG ${VITIS_KERNEL_CONFIG}
-          INCLUDE ${VITIS_KERNEL_INCLUDE}
-          PACKAGE ${VITIS_KERNEL_PACKAGE}
-        )
-      else()
-        message(
-          FATAL_ERROR "'" ${type} "' is not a recognized build target \
-          for acceleration kernels. Consider 'sw_emu', 'hw_emu' or 'hardware'."
-        )
-      endif()
-    endforeach()
+    # if (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64" AND DEFINED CMAKE_SYSROOT})
+    if (DEFINED CMAKE_SYSROOT)
+      # debug()
+      foreach(type ${VITIS_KERNEL_TYPE})
+        if (${type} STREQUAL "sw_emu")
+          vitis_acceleration_kernel_aux(
+            NAME ${VITIS_KERNEL_NAME}
+            FILE ${VITIS_KERNEL_FILE}
+            TYPE "sw_emu"
+            CONFIG ${VITIS_KERNEL_CONFIG}
+            INCLUDE ${VITIS_KERNEL_INCLUDE}
+            PACKAGE ${VITIS_KERNEL_PACKAGE}
+          )
+        elseif (${type} STREQUAL "hw_emu")
+          vitis_acceleration_kernel_aux(
+            NAME ${VITIS_KERNEL_NAME}
+            FILE ${VITIS_KERNEL_FILE}
+            TYPE "hw_emu"
+            CONFIG ${VITIS_KERNEL_CONFIG}
+            INCLUDE ${VITIS_KERNEL_INCLUDE}
+            PACKAGE ${VITIS_KERNEL_PACKAGE}
+          )
+        elseif (${type} STREQUAL "hw")
+          vitis_acceleration_kernel_aux(
+            NAME ${VITIS_KERNEL_NAME}
+            FILE ${VITIS_KERNEL_FILE}
+            TYPE "hw"
+            CONFIG ${VITIS_KERNEL_CONFIG}
+            INCLUDE ${VITIS_KERNEL_INCLUDE}
+            PACKAGE ${VITIS_KERNEL_PACKAGE}
+          )
+        else()
+          message(
+            FATAL_ERROR "'" ${type} "' is not a recognized build target \
+            for acceleration kernels. Consider 'sw_emu', 'hw_emu' or 'hardware'."
+          )
+        endif()
+      endforeach()
+    endif()  # cross compilation, DEFINED CMAKE_SYSROOT
 
 endmacro()  # vitis_acceleration_kernel
 
@@ -214,7 +216,7 @@ macro(vitis_acceleration_kernel_aux)
       )
     endif()
   endif()  # install
-  
+
   if (NOT ${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw")
     execute_process(
       COMMAND
@@ -227,6 +229,9 @@ endmacro()  # vitis_acceleration_kernel_swemu
 # Print relevant variables for debugging purposes
 #
 macro(debug)
+  message("CMAKE_SYSROOT: " ${CMAKE_SYSROOT})
+  message("CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})
+
   message("CMAKE_SOURCE_DIR: " ${CMAKE_SOURCE_DIR})
   message("CMAKE_BINARY_DIR: " ${CMAKE_BINARY_DIR})
   message("CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX})

@@ -13,7 +13,8 @@
 if(DEFINED ENV{XILINX_VITIS})
     set(VPP_PATH $ENV{XILINX_VITIS}/bin/v++)
 else()  # assume using "xilinx_vitis" package
-  message("Deprecated. XILINX_VITIS not defined, defaulting to 'xilinx' directory.")
+  message("WARNING: Using acceleration but XILINX_VITIS is not defined, acceleration kernels won't be generated.")
+  message(STATUS "Defaulting to 'xilinx/vitis' directory.")
   set(VITIS_DIR ${CMAKE_INSTALL_PREFIX}/../xilinx/vitis)  # <ws>/xilinx/vitis
   set(VPP_PATH ${VITIS_DIR}/bin/v++)
 endif()
