@@ -1,7 +1,7 @@
 #    ____  ____
 #   /   /\/   /
 #  /___/  \  /   Copyright (c) 2021, Xilinx®.
-#  \   \   \/    Author: Víctor Mayoral Vilches <v.mayoralv@gmail.com>
+#  \   \   \/    Author: Víctor Mayoral Vilches <victorma@xilinx.com>
 #   \   \
 #   /   /
 #  /___/   /\
@@ -149,101 +149,121 @@ macro(vitis_acceleration_kernel_aux)
 
   # debug()
 
-  # CMake configure time
-  # Build
-  execute_process(
-    COMMAND
-      ${VPP_PATH} -c -t ${VITIS_KERNEL_AUX_TYPE}
-        --config "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}"
-        -k ${VITIS_KERNEL_AUX_NAME}
-        ${INCLUDE_DIRS}
-        "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_FILE}"
-        -o "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
-    RESULT_VARIABLE
-        CMD_ERROR
-  )
-  message(STATUS "CMD_ERROR: " ${CMD_ERROR})
-
-  # adjust final binary name if not "hw" (only "hw" build target is without suffix)
-  set(BINARY_NAME "${VITIS_KERNEL_AUX_NAME}.xclbin")
-  if (NOT ${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw")
-    set(BINARY_NAME "${VITIS_KERNEL_AUX_NAME}.xclbin.${VITIS_KERNEL_AUX_TYPE}")
-    # get a temporary symlink pointing the binary name to allow/permit the
-    # v++ compilation process
-    # NOTE: v++ is sensitive to the artifact names.
-    # See ERROR: [v++ 60-2262] Unsupported input file type specified for
-    # --package option.
+  if(${NOKERNELS})
+    message(STATUS "No kernels built")
+  else()
+    # CMake configure time
+    # Build
     execute_process(
       COMMAND
-        ln -s ${BINARY_NAME} ${VITIS_KERNEL_AUX_NAME}.xclbin
-    )
-  endif()
-
-  # Link
-  execute_process(
-    COMMAND
-      ${VPP_PATH} -l -t ${VITIS_KERNEL_AUX_TYPE}
-        --config "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}"
-        "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
-        -o "${CMAKE_BINARY_DIR}/${BINARY_NAME}"
-  )
-  # package
-  if (${VITIS_KERNEL_AUX_PACKAGE})
-    execute_process(
-      COMMAND
-        ${VPP_PATH} -p -t ${VITIS_KERNEL_AUX_TYPE}
+        ${VPP_PATH} -c -t ${VITIS_KERNEL_AUX_TYPE}
           --config "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}"
-          "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xclbin"
-          --package.out_dir package
-          --package.no_image
+          -k ${VITIS_KERNEL_AUX_NAME}
+          ${INCLUDE_DIRS}
+          "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_FILE}"
+          -o "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
+      RESULT_VARIABLE
+          CMD_ERROR
     )
-  endif()  # package
+    message(STATUS "CMD_ERROR: " ${CMD_ERROR})
 
-  # install
-  if (EXISTS ${CMAKE_BINARY_DIR}/${BINARY_NAME})
-    install(
-      FILES
-        "${CMAKE_BINARY_DIR}/${BINARY_NAME}"
-      DESTINATION
-        lib/${PROJECT_NAME}
-    )
-
-    # package installation
-    if (${VITIS_KERNEL_AUX_PACKAGE})
-      install(
-        DIRECTORY
-          "${CMAKE_BINARY_DIR}/package"
-        DESTINATION
-          lib/${PROJECT_NAME}
+    # adjust final binary name if not "hw" (only "hw" build target is without suffix)
+    set(BINARY_NAME "${VITIS_KERNEL_AUX_NAME}.xclbin")
+    if (NOT ${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw")
+      set(BINARY_NAME "${VITIS_KERNEL_AUX_NAME}.xclbin.${VITIS_KERNEL_AUX_TYPE}")
+      # get a temporary symlink pointing the binary name to allow/permit the
+      # v++ compilation process
+      # NOTE: v++ is sensitive to the artifact names.
+      # See ERROR: [v++ 60-2262] Unsupported input file type specified for
+      # --package option.
+      execute_process(
+        COMMAND
+          ln -s ${BINARY_NAME} ${VITIS_KERNEL_AUX_NAME}.xclbin
       )
+    endif()
 
-      # if hw_emu, symlink to "sim" folder
-      if (${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw_emu")
-        execute_process(
-          COMMAND
-            ln -s ${CMAKE_BINARY_DIR}/package/sim ${FIRMWARE_DATA}/../emulation/sim
-        )
-      endif()  # hw_emu
-    endif()  # package installation
-
-    # if sw_emu, deploy "data" from firmware
-    if (${VITIS_KERNEL_AUX_TYPE} STREQUAL "sw_emu")
-      install(
-        DIRECTORY
-          "${FIRMWARE_DATA}"
-        DESTINATION
-          lib/${PROJECT_NAME}
-      )
-    endif()  # sw_emu
-  endif()  # install
-
-  # cleanup symlink for packaging
-  if (NOT ${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw")
+    # Link
     execute_process(
       COMMAND
-        unlink ${VITIS_KERNEL_AUX_NAME}.xclbin
+        ${VPP_PATH} -l -t ${VITIS_KERNEL_AUX_TYPE}
+          --config "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}"
+          "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
+          -o "${CMAKE_BINARY_DIR}/${BINARY_NAME}"
     )
-  endif()
+    # package
+    if (${VITIS_KERNEL_AUX_PACKAGE})
+      execute_process(
+        COMMAND
+          ${VPP_PATH} -p -t ${VITIS_KERNEL_AUX_TYPE}
+            --config "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}"
+            "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xclbin"
+            --package.out_dir package
+            --package.no_image
+      )
+    endif()  # package
+
+    # install
+    if (EXISTS ${CMAKE_BINARY_DIR}/${BINARY_NAME})
+      # install acceleration kernel
+      install(
+        FILES
+          "${CMAKE_BINARY_DIR}/${BINARY_NAME}"
+        DESTINATION
+          lib/${PROJECT_NAME}
+      )
+
+      # package installation
+      if (${VITIS_KERNEL_AUX_PACKAGE})
+        install(
+          DIRECTORY
+            "${CMAKE_BINARY_DIR}/package"
+          DESTINATION
+            lib/${PROJECT_NAME}
+        )
+
+        # if hw_emu, symlink to "sim" folder
+        if (${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw_emu")
+          # # create emulation dir if it doesn't exist, then symlink which
+          # # this leads to various simlinks (as many as kernels) in a
+          # # compounded way. Not ideal. See below for an alternative that checks
+          #
+          # execute_process(
+          #   COMMAND
+          #     mkdir ${FIRMWARE_DATA}/../emulation
+          # )
+          # execute_process(
+          #   COMMAND
+          #     ln -s ${CMAKE_BINARY_DIR}/package/sim ${FIRMWARE_DATA}/../emulation/sim
+          # )
+
+          set(EMULATIONSIMDIR "test -e ${FIRMWARE_DATA}/../emulation/sim || ")
+          run("${EMULATIONSIMDIR} ln -s ${CMAKE_BINARY_DIR}/package/sim ${FIRMWARE_DATA}/../emulation/sim")
+        endif()  # hw_emu
+      endif()  # package installation
+
+      # if sw_emu, deploy "data" from firmware
+      if (${VITIS_KERNEL_AUX_TYPE} STREQUAL "sw_emu")
+        install(
+          DIRECTORY
+            "${FIRMWARE_DATA}"
+          DESTINATION
+            lib/${PROJECT_NAME}
+        )
+      endif()  # sw_emu
+    endif()  # install
+
+    # cleanup symlink for packaging
+    if (NOT ${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw")
+      # # Check before unlinking, see below
+      # execute_process(
+      #   COMMAND
+      #     unlink ${VITIS_KERNEL_AUX_NAME}.xclbin
+      # )
+      set(KERNELTOUNLINK "test -e ${VITIS_KERNEL_AUX_NAME}.xclbin && ")
+      run("${KERNELTOUNLINK} unlink ${VITIS_KERNEL_AUX_NAME}.xclbin")
+
+    endif()
+  endif()  # NOKERNELS
 endmacro()  # vitis_acceleration_kernel_swemu
 
 #
@@ -272,3 +292,10 @@ macro(debug)
   message("CMD: " ${CMD})
   message("INCLUDE_DIRS: " ${INCLUDE_DIRS})
 endmacro()  # debug
+
+#
+#  A simple macro to facilitate runing processes with bash
+#
+macro(run CMD)
+  execute_process(COMMAND bash -c ${CMD})
+endmacro()
