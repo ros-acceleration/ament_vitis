@@ -10,5 +10,5 @@
 #
 # defines the path to the platform "data" folder (product of packaging with v++)
 
-set(FIRMWARE_DATA ${CMAKE_INSTALL_PREFIX}/../xilinx/firmware/data)
-      # <ws>/xilinx/firmware/data
+set(FIRMWARE_DATA ${CMAKE_INSTALL_PREFIX}/../acceleration/firmware/xilinx/data)
+      # <ws>/acceleration/firmware/xilinx/data
