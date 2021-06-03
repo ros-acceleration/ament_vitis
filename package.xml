@@ -3,7 +3,9 @@
 <package format="2">
   <name>ament_vitis</name>
   <version>0.2.0</version>
-  <description>Add functions and macros to facilitate Xilinx Vitis processes.</description>
+  <description>
+    CMake macros and utilities to include Vitis platform into the ROS 2 build system (ament) and its development flows.
+  </description>
   <maintainer email="victorma@xilinx.com">Víctor Mayoral Vilches</maintainer>
   <author email="victorma@xilinx.com">Víctor Mayoral Vilches</author>
   <license>Apache License 2.0</license>
