@@ -14,13 +14,15 @@ find_package(ament_cmake_core QUIET REQUIRED)
 
 # various functions / macros
 foreach(filename
-  "vitis_acceleration_kernel"
   "vpp_path"
   "vitis_path"
   "vivado_path"
   "hls_path"
   "platform_repo_paths"
   "firmware_data_path"
+  "firmware_soc_path"
+  "vitis_hls"
+  "vitis_acceleration_kernel"
 )
   include(${ament_vitis_DIR}/${filename}.cmake)
 endforeach()

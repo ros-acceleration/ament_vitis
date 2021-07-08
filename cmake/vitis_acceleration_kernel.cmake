@@ -240,9 +240,11 @@ macro(vitis_acceleration_kernel_aux)
           run("${EMULATIONSIMDIR} ln -s ${CMAKE_BINARY_DIR}/package/sim ${FIRMWARE_DATA}/../emulation/sim")
         endif()  # hw_emu
 
-        # if hw_emu, symlink to "sim" folder
+        # if hw, symlink to BOOT.BIN
+        # NOTE: only the first kernel will be symlinked, the rest won't
+        #
         if (${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw")
-          set(EMULATIONSIMDIR "test -e ${FIRMWARE_DATA}/../emulation/sim || ")
+          set(EMULATIONSIMDIR "test -e ${FIRMWARE_DATA}/../BOOT.BIN || ")
           run("${EMULATIONSIMDIR} ln -s ${CMAKE_BINARY_DIR}/package/BOOT.BIN ${FIRMWARE_DATA}/../BOOT.BIN")
         endif()  # hw_emu
       endif()  # package installation

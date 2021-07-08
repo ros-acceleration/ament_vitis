@@ -1,0 +1,4 @@
+# Create a project
+open_project -reset @VITIS_HLS_PROJECT_VALUE@
+
+exit

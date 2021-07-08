@@ -3,7 +3,7 @@
 <package format="2">
   <name>ament_vitis</name>
   <version>0.2.0</version>
-  <description>Add functions and macros to facilitate Xilinx Vitis processes.</description>
+  <description>Add functions and macros to facilitate use of Xilinx's Vitis processes.</description>
   <maintainer email="victorma@xilinx.com">Víctor Mayoral Vilches</maintainer>
   <license>Apache License 2.0</license>
 
