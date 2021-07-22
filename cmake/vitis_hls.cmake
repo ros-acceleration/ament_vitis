@@ -99,7 +99,7 @@ macro(vitis_hls_generate_tcl)
       foreach(clock_item ${VITIS_HLS_CLOCK})
         FILE(APPEND ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl.in
         "# solution_${clock_item}ns\n"  # mark each solution with clock ns
-        "open_solution solution_${clock_item}ns\n"  # mark each solution with clock ns
+        "open_solution -flow_target vitis solution_${clock_item}ns\n"  # mark each solution with clock ns
         "set_part {${FIRMWARE_SOC}}\n"
         "create_clock -period ${clock_item}\n"
         "csim_design -ldflags \"-lOpenCL\" -profile\n"
