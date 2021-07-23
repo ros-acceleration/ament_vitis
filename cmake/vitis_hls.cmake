@@ -113,7 +113,7 @@ macro(vitis_hls_generate_tcl)
 
         if (${VITIS_HLS_RTLSIMULATION})
           FILE(APPEND ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl.in
-            "cosim_design\n"
+            "cosim_design -O -rtl verilog -ldflags \"-L/lib/x86_64-linux-gnu\"\n"
           )
         endif()  # VITIS_HLS_RTLSIMULATION
 
