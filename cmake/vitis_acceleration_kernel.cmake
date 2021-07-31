@@ -152,44 +152,45 @@ macro(vitis_acceleration_kernel_aux)
   if(${NOKERNELS})
     message(STATUS "No kernels built")
   else()
-    # # CMake configure time
-    # # Build
-    # execute_process(
-    #   COMMAND
-    #     ${VPP_PATH} -c -t ${VITIS_KERNEL_AUX_TYPE}
-    #       --config "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}"
-    #       -k ${VITIS_KERNEL_AUX_NAME}
-    #       ${INCLUDE_DIRS}
-    #       "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_FILE}"
-    #       -o "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
-    #   RESULT_VARIABLE
-    #       CMD_ERROR
-    # )
-    # message(STATUS "CMD_ERROR: " ${CMD_ERROR})
+    # CMake configure time
+    # Build
+    execute_process(
+      COMMAND
+        ${VPP_PATH} -c -t ${VITIS_KERNEL_AUX_TYPE}
+          --config "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}"
+          -k ${VITIS_KERNEL_AUX_NAME}
+          ${INCLUDE_DIRS}
+          "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_FILE}"
+          -o "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
+      RESULT_VARIABLE
+          CMD_ERROR
+    )
+    message(STATUS "CMD_ERROR: " ${CMD_ERROR})
 
-    # # adjust final binary name if not "hw" (only "hw" build target is without suffix)
-    # set(BINARY_NAME "${VITIS_KERNEL_AUX_NAME}.xclbin")
-    # if (NOT ${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw")
-    #   set(BINARY_NAME "${VITIS_KERNEL_AUX_NAME}.xclbin.${VITIS_KERNEL_AUX_TYPE}")
-    #   # get a temporary symlink pointing the binary name to allow/permit the
-    #   # v++ compilation process
-    #   # NOTE: v++ is sensitive to the artifact names.
-    #   # See ERROR: [v++ 60-2262] Unsupported input file type specified for
-    #   # --package option.
-    #   execute_process(
-    #     COMMAND
-    #       ln -s ${BINARY_NAME} ${VITIS_KERNEL_AUX_NAME}.xclbin
-    #   )
-    # endif()
+    # adjust final binary name if not "hw" (only "hw" build target is without suffix)
+    set(BINARY_NAME "${VITIS_KERNEL_AUX_NAME}.xclbin")
+    if (NOT ${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw")
+      set(BINARY_NAME "${VITIS_KERNEL_AUX_NAME}.xclbin.${VITIS_KERNEL_AUX_TYPE}")
+      # get a temporary symlink pointing the binary name to allow/permit the
+      # v++ compilation process
+      # NOTE: v++ is sensitive to the artifact names.
+      # See ERROR: [v++ 60-2262] Unsupported input file type specified for
+      # --package option.
+      execute_process(
+        COMMAND
+          ln -s ${BINARY_NAME} ${VITIS_KERNEL_AUX_NAME}.xclbin
+      )
+    endif()
 
-    # # Link
-    # execute_process(
-    #   COMMAND
-    #     ${VPP_PATH} -l -t ${VITIS_KERNEL_AUX_TYPE}
-    #       --config "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}"
-    #       "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
-    #       -o "${CMAKE_BINARY_DIR}/${BINARY_NAME}"
-    # )
+    # Link
+    execute_process(
+      COMMAND
+        ${VPP_PATH} -l -t ${VITIS_KERNEL_AUX_TYPE}
+          --config "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}"
+          "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
+          -o "${CMAKE_BINARY_DIR}/${BINARY_NAME}"
+    )
+
     # package
     if (${VITIS_KERNEL_AUX_PACKAGE})
       execute_process(
