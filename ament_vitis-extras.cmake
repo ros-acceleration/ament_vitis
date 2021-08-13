@@ -20,7 +20,8 @@ foreach(filename
   "hls_path"
   "platform_repo_paths"
   "firmware_data_path"
-  "firmware_soc_path"
+  # "firmware_soc_path"  # SoC path determine at build-time instead,
+                         #  see "vitis_hls_generate_tcl" macro
   "vitis_hls"
   "vitis_acceleration_kernel"
 )

@@ -96,6 +96,10 @@ macro(vitis_hls_generate_tcl)
       "set_top @VITIS_HLS_TOPFUNCTION_VALUE@\n"
       )
       
+      # determine the SoC at build time and based on the select-ed firmware
+      set(FIRMWARE_SOC_PATH ${CMAKE_INSTALL_PREFIX}/../acceleration/firmware/select/SOC)
+      file (STRINGS ${FIRMWARE_SOC_PATH} FIRMWARE_SOC)
+
       foreach(clock_item ${VITIS_HLS_CLOCK})
         FILE(APPEND ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl.in
         "# solution_${clock_item}ns\n"  # mark each solution with clock ns
