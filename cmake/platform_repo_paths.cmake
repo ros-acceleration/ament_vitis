@@ -17,6 +17,6 @@
 if(DEFINED ENV{PLATFORM_REPO_PATHS})
   set(PLATFORM_REPO_PATHS $ENV{PLATFORM_REPO_PATHS})
 else()
-  set(PLATFORM_REPO_PATHS ${CMAKE_INSTALL_PREFIX}/../acceleration/firmware/target/platform)
-      # <ws>/acceleration/firmware/target/platform
+  set(PLATFORM_REPO_PATHS ${CMAKE_INSTALL_PREFIX}/../acceleration/firmware/select/platform)
+      # <ws>/acceleration/firmware/select/platform
 endif()
