@@ -203,12 +203,30 @@ macro(vitis_acceleration_kernel_aux)
       )
     endif()  # package
 
+    #
+    # dfx-mgr artifacts
+    #
+    # NOTE: dfx-mgr implementation in 2020.2.2 requires
+    # besides the xilinx binary kernel (.xclbin), to 
+    # provide also two additional files:
+    #   - .bit.bin raw bitstream
+    #   - .dtbo device tree blob overlay
+    #    
+    # extract the raw bitstream
+    run("xclbinutil --dump-section BITSTREAM:RAW:${VITIS_KERNEL_AUX_NAME}.bit.bin \
+        --input ${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xclbin --force")
+    # create 
+    run("cp ${FIRMWARE_DATA}/../device_tree/kernel_default.dtbo \
+            ${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.dtbo")
+    
     # install
     if (EXISTS ${CMAKE_BINARY_DIR}/${BINARY_NAME})
-      # install acceleration kernel
+      # install acceleration kernel, and ROS 2 related artifacts
       install(
         FILES
           "${CMAKE_BINARY_DIR}/${BINARY_NAME}"
+          "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.dtbo"
+          "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.bit.bin"
         DESTINATION
           lib/${PROJECT_NAME}
       )
