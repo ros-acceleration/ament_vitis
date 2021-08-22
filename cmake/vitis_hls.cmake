@@ -71,7 +71,6 @@ macro(vitis_hls_generate_tcl)
       set(VITIS_HLS_TOPFUNCTION_VALUE ${VITIS_HLS_TOPFUNCTION})
 
       # define template, with or without include directories
-
       FILE(WRITE ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl.in
       "open_project -reset @VITIS_HLS_PROJECT_VALUE@\n"
       "add_files @VITIS_HLS_SRC_VALUE@\n"
@@ -141,6 +140,7 @@ macro(vitis_hls_generate_tcl)
       # set placeholders      
       # set(VITIS_HLS_SRC_VALUE ${VITIS_HLS_SRC})  # this gets a list as "value1;value2"
       # we need instead: "value1 value2"
+      set(VITIS_HLS_SRC_VALUE "")  # re-initialize, needed if various calls in the same CMakeLists.txt
       foreach(VITIS_HLS_SRC_file ${VITIS_HLS_SRC})
         set(VITIS_HLS_SRC_VALUE "${VITIS_HLS_SRC_VALUE} ${CMAKE_SOURCE_DIR}/${VITIS_HLS_SRC_file}")
       endforeach()
