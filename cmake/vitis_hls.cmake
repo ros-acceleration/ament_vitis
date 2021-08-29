@@ -79,12 +79,22 @@ macro(vitis_hls_generate_tcl)
       if(DEFINED VITIS_HLS_HEADERS)
         # convert to "value1 value2"
         foreach(VITIS_HLS_HEADERS_file ${VITIS_HLS_HEADERS})
-          set(VITIS_HLS_HEADERS_VALUE "${VITIS_HLS_HEADERS_VALUE} ${CMAKE_SOURCE_DIR}/${VITIS_HLS_HEADERS_file}")
+          if(IS_ABSOLUTE ${VITIS_HLS_HEADERS_file})
+            set(VITIS_HLS_HEADERS_VALUE "${VITIS_HLS_HEADERS_VALUE} -I ${VITIS_HLS_HEADERS_file}")
+          else()
+            set(VITIS_HLS_HEADERS_VALUE "${VITIS_HLS_HEADERS_VALUE} -I ${CMAKE_SOURCE_DIR}/${VITIS_HLS_HEADERS_file}")
+          endif()
         endforeach()
 
+        # NOTE:
+        #    See https://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html for the differences
+        #     between -isystem and -I
+        # FILE(APPEND ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl.in
+        # "add_files -tb @VITIS_HLS_TESTBENCH_VALUE@ -cflags \"-isystem @VITIS_HLS_HEADERS_VALUE@\"\n"
+        # )
         FILE(APPEND ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl.in
-        "add_files -tb @VITIS_HLS_TESTBENCH_VALUE@ -cflags \"-isystem @VITIS_HLS_HEADERS_VALUE@\"\n"
-        )
+        "add_files -tb @VITIS_HLS_TESTBENCH_VALUE@ -cflags \" @VITIS_HLS_HEADERS_VALUE@\"\n")
+
       else()
         FILE(APPEND ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl.in
           "add_files -tb @VITIS_HLS_TESTBENCH_VALUE@\n"
