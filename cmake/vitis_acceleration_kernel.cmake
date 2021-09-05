@@ -135,12 +135,16 @@ macro(vitis_acceleration_kernel_aux)
   # set(ENV{PATH} "$ENV{PATH}:${XILINX_HLS}/bin")
 
   # compile
-  set(CMD "${VPP_PATH} -c -t ${VITIS_KERNEL_AUX_TYPE} --config " ${CMAKE_SOURCE_DIR} "/"
-    ${VITIS_KERNEL_AUX_CONFIG} " -k " ${VITIS_KERNEL_AUX_NAME}
+  set(CMD "PLATFORM_REPO_PATHS=${PLATFORM_REPO_PATHS} ${VPP_PATH} -c -t ${VITIS_KERNEL_AUX_TYPE} --config " ${CMAKE_SOURCE_DIR} "/"
+    ${VITIS_KERNEL_AUX_CONFIG} " -k " ${VITIS_KERNEL_AUX_NAME} " "
   )
   set(INCLUDE_DIRS "")
   foreach(include_item ${VITIS_KERNEL_AUX_INCLUDE})
-    list(APPEND INCLUDE_DIRS "-I${CMAKE_SOURCE_DIR}/${include_item}")
+    if(IS_ABSOLUTE ${include_item})
+      list(APPEND INCLUDE_DIRS "-I${include_item} ")
+    else()
+      list(APPEND INCLUDE_DIRS "-I${CMAKE_SOURCE_DIR}/${include_item} ")
+    endif()
   endforeach()
 
   list(APPEND CMD ${INCLUDE_DIRS})
