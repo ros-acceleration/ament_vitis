@@ -2,6 +2,11 @@
 Changelog for package ament_vitis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.6.0 (2021-10-19)
+------------------
+* Make output less verbose
+* CMake scripts report only when hardware acceleration disabled
+
 0.5.0 (2021-06-03)
 ------------------
 * Add CHANGELOG.rst

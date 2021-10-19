@@ -13,7 +13,7 @@
 if(DEFINED ENV{XILINX_VIVADO})
   set(XILINX_VIVADO $ENV{XILINX_VIVADO})
 else()
-  message("WARNING: Using acceleration but XILINX_VIVADO is not defined, acceleration kernels won't be generated.")
+  message("WARNING: XILINX_VIVADO is not defined, hardware acceleration disabled.")
   message(STATUS "Defaulting to 'xilinx/vivado' directory.")
   set(XILINX_VIVADO ${CMAKE_INSTALL_PREFIX}/../xilinx/vivado)  # <ws>/xilinx/vivado
 endif()
