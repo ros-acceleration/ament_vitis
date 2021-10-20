@@ -11,10 +11,10 @@
 # include vitis extras
 
 find_package(ament_cmake_core QUIET REQUIRED)
+find_package(ament_acceleration REQUIRED)
 
 # various functions / macros
 foreach(filename
-  "ros_acceleration"
   "vpp_path"
   "vitis_path"
   "vivado_path"
