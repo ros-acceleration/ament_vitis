@@ -2,6 +2,12 @@
 Changelog for package ament_vitis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.7.0 (2021-11-23)
+------------------
+* Add ROS_ACCELERATION variable enablement
+* Move ROS_ACCELERATION to ament_acceleration
+* Export RTL IP for every kernel solution
+
 0.6.0 (2021-10-19)
 ------------------
 * Make output less verbose
