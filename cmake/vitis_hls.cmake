@@ -8,7 +8,7 @@
 #  \   \  /  \
 #   \___\/\___\
 #
-# Vitis HLS macros to integrate High-Level Synthesis (HLS) 
+# Vitis HLS macros to integrate High-Level Synthesis (HLS)
 # capabilities into the  ROS ament build system
 #
 # See https://www.xilinx.com/html_docs/xilinx2020_2/vitis_doc/gnq1597858079367.html
@@ -19,7 +19,7 @@
 #
 # .. note:: this macro will command CMake to generate
 # the corresponding Tcl script according to the parameters
-# designed below. To execute such script use either Vitis CLI 
+# designed below. To execute such script use either Vitis CLI
 # (e.g. via "vitis_hls -f <tcl-script>") or colcon krs hls.
 #
 # .. note:: the macro will generate one solution per each clock
@@ -99,12 +99,12 @@ macro(vitis_hls_generate_tcl)
         FILE(APPEND ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl.in
           "add_files -tb @VITIS_HLS_TESTBENCH_VALUE@\n"
         )
-      endif()  # VITIS_HLS_HEADERS, add include directories      
+      endif()  # VITIS_HLS_HEADERS, add include directories
 
       FILE(APPEND ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl.in
       "set_top @VITIS_HLS_TOPFUNCTION_VALUE@\n"
       )
-      
+
       # determine the SoC at build time and based on the select-ed firmware
       set(FIRMWARE_SOC_PATH ${CMAKE_INSTALL_PREFIX}/../acceleration/firmware/select/SOC)
       file (STRINGS ${FIRMWARE_SOC_PATH} FIRMWARE_SOC)
@@ -136,6 +136,15 @@ macro(vitis_hls_generate_tcl)
           )
         endif()  # VITIS_HLS_RTLIMPLEMENTATION
 
+        # Create RTL IP by default as well
+        FILE(APPEND ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl.in
+          "config_interface -m_axi_alignment_byte_size 64 -m_axi_latency 64 -m_axi_max_widen_bitwidth 512 -m_axi_offset slave\n"
+          "config_rtl -register_reset_num 3\n"
+          "config_export -format xo -output ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}/@VITIS_HLS_TOPFUNCTION_VALUE@.xo -rtl verilog\n"
+          "set_directive_top -name @VITIS_HLS_TOPFUNCTION_VALUE@ @VITIS_HLS_TOPFUNCTION_VALUE@\n"
+          "export_design -rtl verilog -format ip_catalog\n"
+        )
+
       # exit at the end
       FILE(APPEND ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl.in
       "\n"
@@ -146,23 +155,23 @@ macro(vitis_hls_generate_tcl)
       FILE(APPEND ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl.in
       "exit\n"
       )
-      
-      # set placeholders      
+
+      # set placeholders
       # set(VITIS_HLS_SRC_VALUE ${VITIS_HLS_SRC})  # this gets a list as "value1;value2"
       # we need instead: "value1 value2"
       set(VITIS_HLS_SRC_VALUE "")  # re-initialize, needed if various calls in the same CMakeLists.txt
       foreach(VITIS_HLS_SRC_file ${VITIS_HLS_SRC})
         set(VITIS_HLS_SRC_VALUE "${VITIS_HLS_SRC_VALUE} ${CMAKE_SOURCE_DIR}/${VITIS_HLS_SRC_file}")
       endforeach()
-      set(VITIS_HLS_TESTBENCH_VALUE ${CMAKE_SOURCE_DIR}/${VITIS_HLS_TESTBENCH})      
+      set(VITIS_HLS_TESTBENCH_VALUE ${CMAKE_SOURCE_DIR}/${VITIS_HLS_TESTBENCH})
       # set(VITIS_HLS_CLOCK_VALUE ${VITIS_HLS_CLOCK})  # not necessary anymore, iterating over clocks above
-      
+
       # replace placeholders and produce final Tcl script
       configure_file(${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl.in ${CMAKE_BINARY_DIR}/${VITIS_HLS_PROJECT}.tcl)
 
       # install Tcl script
       ## NOTE: this would move .tcl scripts to the install-* directory. Instead
-      ## it's recommended to keep things in build-*, rationale is that install-* 
+      ## it's recommended to keep things in build-*, rationale is that install-*
       ## is what we're deploying to the embedded platforms and we want this to be compact
       # install(
       #   FILES
