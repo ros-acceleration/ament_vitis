@@ -2,11 +2,19 @@
 Changelog for package ament_vitis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.8.0 (2022-01-21)
+------------------
+* Refactor vitis_acceleration_kernel, add clock and link capabilities
+* Add support for 2021.2 dfx-mgr flavour
+* Add DTSI support to vitis_acceleration_kernel, refactor
+* Release 0.8.0
+
 0.7.0 (2021-11-23)
 ------------------
 * Add ROS_ACCELERATION variable enablement
 * Move ROS_ACCELERATION to ament_acceleration
 * Export RTL IP for every kernel solution
+* Update CHANGELOG, release 0.7.0
 
 0.6.0 (2021-10-19)
 ------------------
