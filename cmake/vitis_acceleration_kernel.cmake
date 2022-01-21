@@ -31,6 +31,11 @@
 # for the kernel e.g. src/zcu102.cfg.
 # :type target: string
 #
+# :param DTSI (optional): Device Tree Source Include files, define additions to the device
+# tree so that the corresponding acceleration kernel can operate appropriately.
+# :type target: string
+#
+#
 # :param CLOCK: Frequency in Hz at which the kernel should be compiled by
 # Vitis HLS.
 # See https://www.xilinx.com/html_docs/xilinx2020_2/vitis_doc/vitiscommandcompiler.html#mcj1568640526180__section_bh5_dg4_bjb
@@ -53,9 +58,26 @@
 # the corresponding artifacts for emulation.
 # :type target: bool
 #
+#
+# Example:
+#
+# vitis_acceleration_kernel(
+#     NAME vadd_faster
+#     FILE src/vadd.cpp
+#     CONFIG src/kv260.cfg
+#     DTSI src/vadd_faster.dtsi
+#     CLOCK 100000000:vadd_faster
+#     INCLUDE
+#       include
+#     TYPE
+#       hw
+#     LINK
+#     PACKAGE
+#   )
+#
 macro(vitis_acceleration_kernel)
     set(options PACKAGE LINK)
-    set(oneValueArgs NAME FILE CONFIG CLOCK)
+    set(oneValueArgs NAME FILE CONFIG DTSI CLOCK)
     set(multiValueArgs TYPE INCLUDE)
 
     cmake_parse_arguments(VITIS_KERNEL "${options}" "${oneValueArgs}"
@@ -88,6 +110,7 @@ macro(vitis_acceleration_kernel)
             TYPE ${BUILT_TYPE}
             CLOCK ${VITIS_KERNEL_CLOCK}
             CONFIG ${VITIS_KERNEL_CONFIG}
+            DTSI ${VITIS_KERNEL_DTSI}
             INCLUDE ${VITIS_KERNEL_INCLUDE}
             LINK
             PACKAGE
@@ -99,6 +122,7 @@ macro(vitis_acceleration_kernel)
             TYPE ${BUILT_TYPE}
             CLOCK ${VITIS_KERNEL_CLOCK}
             CONFIG ${VITIS_KERNEL_CONFIG}
+            DTSI ${VITIS_KERNEL_DTSI}
             INCLUDE ${VITIS_KERNEL_INCLUDE}
             LINK
           )
@@ -109,6 +133,7 @@ macro(vitis_acceleration_kernel)
             TYPE ${BUILT_TYPE}
             CLOCK ${VITIS_KERNEL_CLOCK}
             CONFIG ${VITIS_KERNEL_CONFIG}
+            DTSI ${VITIS_KERNEL_DTSI}
             INCLUDE ${VITIS_KERNEL_INCLUDE}
             PACKAGE
           )
@@ -119,6 +144,7 @@ macro(vitis_acceleration_kernel)
             TYPE ${BUILT_TYPE}
             CLOCK ${VITIS_KERNEL_CLOCK}
             CONFIG ${VITIS_KERNEL_CONFIG}
+            DTSI ${VITIS_KERNEL_DTSI}
             INCLUDE ${VITIS_KERNEL_INCLUDE}
           )
         endif()
@@ -139,6 +165,10 @@ endmacro()  # vitis_acceleration_kernel
 #
 # :param VITIS_KERNEL_AUX_CONFIG: CMAKE_SOURCE_DIR relative path to configuration
 # file for the kernel e.g. src/zcu102.cfg.
+# :type target: string
+#
+# :param VITIS_KERNEL_AUX_DTSI: CMAKE_SOURCE_DIR relative path to dtsi
+# file for the kernel e.g. src/vadd_faster.dtsi.
 # :type target: string
 #
 # :param VITIS_KERNEL_AUX_CLOCK: Frequency in Hz at which the kernel should be
@@ -163,7 +193,7 @@ endmacro()  # vitis_acceleration_kernel
 macro(vitis_acceleration_kernel_aux)
   # arguments
   set(options PACKAGE LINK)
-  set(oneValueArgs NAME FILE CONFIG TYPE CLOCK)
+  set(oneValueArgs NAME FILE CONFIG DTSI TYPE CLOCK)
   set(multiValueArgs INCLUDE)
   cmake_parse_arguments(VITIS_KERNEL_AUX "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN} )
@@ -175,9 +205,14 @@ macro(vitis_acceleration_kernel_aux)
   set(ENV{XILINX_HLS} ${XILINX_HLS})
   # set(ENV{PATH} "$ENV{PATH}:${XILINX_HLS}/bin")
 
-  set(CMD "PLATFORM_REPO_PATHS=${PLATFORM_REPO_PATHS} ${VPP_PATH} -c -t ${VITIS_KERNEL_AUX_TYPE} --config " ${CMAKE_SOURCE_DIR} "/"
-    ${VITIS_KERNEL_AUX_CONFIG} " -k " ${VITIS_KERNEL_AUX_NAME} " "
-  )
+  # Use config file provided or default one
+  if ("${VITIS_KERNEL_AUX_CONFIG}" STREQUAL "")
+    set(VITIS_CONFIGURATION_FILE "${FIRMWARE_DATA}/../platform.cfg")
+  else()
+    set(VITIS_CONFIGURATION_FILE "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}")
+  endif()
+
+  set(CMD "PLATFORM_REPO_PATHS=${PLATFORM_REPO_PATHS} ${VPP_PATH} -c -t ${VITIS_KERNEL_AUX_TYPE} --config " ${VITIS_CONFIGURATION_FILE} " -k " ${VITIS_KERNEL_AUX_NAME} " ")
   set(INCLUDE_DIRS "")
   foreach(include_item ${VITIS_KERNEL_AUX_INCLUDE})
     if(IS_ABSOLUTE ${include_item})
@@ -197,36 +232,36 @@ macro(vitis_acceleration_kernel_aux)
     message(STATUS "No kernels built")
   else()
     # CMake configure time
-
-    # # Build
-    # ## pass clock flag if available
-    # if ("${VITIS_KERNEL_AUX_CLOCK}" STREQUAL "")
-    #   execute_process(
-    #     COMMAND
-    #       ${VPP_PATH} -c -t ${VITIS_KERNEL_AUX_TYPE}
-    #         --config "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}"
-    #         -k ${VITIS_KERNEL_AUX_NAME}
-    #         ${INCLUDE_DIRS}
-    #         "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_FILE}"
-    #         -o "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
-    #     RESULT_VARIABLE
-    #         CMD_ERROR
-    #   )
-    # else()
-    #   execute_process(
-    #     COMMAND
-    #       ${VPP_PATH} -c --hls.clock ${VITIS_KERNEL_AUX_CLOCK} -t ${VITIS_KERNEL_AUX_TYPE}
-    #         --config "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}"
-    #         -k ${VITIS_KERNEL_AUX_NAME}
-    #         ${INCLUDE_DIRS}
-    #         "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_FILE}"
-    #         -o "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
-    #     RESULT_VARIABLE
-    #         CMD_ERROR
-    #   )
-    #   # message("${VITIS_KERNEL_AUX_CLOCK}")  # debug
-    # endif()
-    # message(STATUS "CMD_ERROR: " ${CMD_ERROR})
+    
+    # Build
+    ## pass clock flag if available
+    if ("${VITIS_KERNEL_AUX_CLOCK}" STREQUAL "")
+      execute_process(
+        COMMAND
+          ${VPP_PATH} -c -t ${VITIS_KERNEL_AUX_TYPE}
+            --config "${VITIS_CONFIGURATION_FILE}"
+            -k ${VITIS_KERNEL_AUX_NAME}
+            ${INCLUDE_DIRS}
+            "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_FILE}"
+            -o "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
+        RESULT_VARIABLE
+            CMD_ERROR
+      )
+    else()
+      execute_process(
+        COMMAND
+          ${VPP_PATH} -c --hls.clock ${VITIS_KERNEL_AUX_CLOCK} -t ${VITIS_KERNEL_AUX_TYPE}
+            --config "${VITIS_CONFIGURATION_FILE}"
+            -k ${VITIS_KERNEL_AUX_NAME}
+            ${INCLUDE_DIRS}
+            "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_FILE}"
+            -o "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
+        RESULT_VARIABLE
+            CMD_ERROR
+      )
+      # message("${VITIS_KERNEL_AUX_CLOCK}")  # debug
+    endif()
+    message(STATUS "CMD_ERROR: " ${CMD_ERROR})
 
     # adjust final binary name if not "hw" (only "hw" build target is without suffix)
     set(BINARY_NAME "${VITIS_KERNEL_AUX_NAME}.xclbin")
@@ -236,14 +271,14 @@ macro(vitis_acceleration_kernel_aux)
 
     # Link
     if (${VITIS_KERNEL_AUX_LINK})
-    #   # message("linking")  # debug
-    #   execute_process(
-    #     COMMAND
-    #       ${VPP_PATH} -l -t ${VITIS_KERNEL_AUX_TYPE}
-    #         --config "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}"
-    #         "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
-    #         -o "${CMAKE_BINARY_DIR}/${BINARY_NAME}"
-    #   )
+      # message("linking")  # debug
+      execute_process(
+        COMMAND
+          ${VPP_PATH} -l -t ${VITIS_KERNEL_AUX_TYPE}
+            --config "${VITIS_CONFIGURATION_FILE}"
+            "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xo"
+            -o "${CMAKE_BINARY_DIR}/${BINARY_NAME}"
+      )
 
       if (NOT ${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw")
         # get a temporary symlink pointing the binary name to allow/permit the
@@ -265,7 +300,7 @@ macro(vitis_acceleration_kernel_aux)
         execute_process(
           COMMAND
             ${VPP_PATH} -p -t ${VITIS_KERNEL_AUX_TYPE}
-              --config "${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_CONFIG}"
+              --config "${VITIS_CONFIGURATION_FILE}"
               "${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xclbin"
               --package.out_dir package
               --package.no_image
@@ -286,7 +321,7 @@ macro(vitis_acceleration_kernel_aux)
       #   - .bit.bin bootgen-generated file
       #   - .dtbo device tree blog overlay
       #
-      # See https://xilinx.github.io/kria-apps-docs/creating_applications/1.0/build/html/docs/creating_applications_vitis_accel_flow.html#step-3-create-xclbin-and-bit-bin-file-from-vitis
+      # See https://bit.ly/3qLCHgR
       #
 
       # # 2020.2
@@ -301,15 +336,24 @@ macro(vitis_acceleration_kernel_aux)
       # extract the raw bitstream
       run("xclbinutil --dump-section BITSTREAM:RAW:${VITIS_KERNEL_AUX_NAME}.bit \
             --input ${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.xclbin --force")
+      
       # generate bif file
       run("echo 'all:{${VITIS_KERNEL_AUX_NAME}.bit}' > ${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.bif")
+      
       # generate .bit.bin file
       run("bootgen -w -arch zynqmp -process_bitstream bin -image ${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.bif")
-      # copy dtbo
+      
+      # generate or copy default dtbo
+      if ("${VITIS_KERNEL_AUX_DTSI}" STREQUAL "")
       run("cp ${FIRMWARE_DATA}/../device_tree/kernel_default.dtbo \
               ${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.dtbo")
+      else()
+        run("dtc -I dts -O dtb -o ${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.dtbo \
+              ${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_DTSI}")
+      endif()  # dtbo generation - or copy
+      
       # generate shell.json
-      run("printf '{\n\t'\''shell_type'\'' : '\''XRT_FLAT'\'',\n\t'\''num_slots'\'' : '\''1'\''\n}\n' > ${CMAKE_BINARY_DIR}/shell.json")
+      run("printf '{\n\t'\"'shell_type'\"' : '\"'XRT_FLAT'\"',\n\t'\"'num_slots'\"' : '\"'1'\"'\n}\n' > ${CMAKE_BINARY_DIR}/shell.json")
 
       # install
       if (EXISTS ${CMAKE_BINARY_DIR}/${BINARY_NAME})
