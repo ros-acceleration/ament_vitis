@@ -48,54 +48,56 @@ macro(vitis_link_kernel)
     
     # if (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64" AND DEFINED CMAKE_SYSROOT})
     if (DEFINED CMAKE_SYSROOT)
-
-        # list all kernels
-        set(KERNELS_INCLUDE "")
-        foreach(include_item ${VITIS_LINK_KERNELS})
-            string(APPEND KERNELS_INCLUDE "${CMAKE_BINARY_DIR}/${include_item}.xo ")
-        endforeach()
-        
-        # place and route
-        set(ENV{PLATFORM_REPO_PATHS} ${PLATFORM_REPO_PATHS})
-        set(CMD "${VPP_PATH} -l -t hw --config ${CMAKE_SOURCE_DIR}/${VITIS_LINK_CONFIG} ${KERNELS_INCLUDE} -o ${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.xclbin " )
-        # message(${CMD})
-        run(${CMD})
-        
-        # generate Vitis Accelerated Application (AA) files, if linking was successful
-        if (EXISTS "${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.xclbin")
-            ## extract the raw bitstream
-            run("xclbinutil --dump-section BITSTREAM:RAW:${VITIS_LINK_OUTPUT}.bit \
-                    --input ${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.xclbin --force")
-            # generate bif file
-            run("echo 'all:{${VITIS_LINK_OUTPUT}.bit}' > ${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.bif")
-            # generate .bit.bin file
-            run("bootgen -w -arch zynqmp -process_bitstream bin -image ${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.bif")
-            # generate or copy default dtbo
-            if ("${VITIS_LINK_DTSI}" STREQUAL "")
-                run("cp ${FIRMWARE_DATA}/../device_tree/kernel_default.dtbo \
-                    ${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.dtbo")
-            else()
-                run("dtc -I dts -O dtb -o ${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.dtbo \
-                    ${CMAKE_SOURCE_DIR}/${VITIS_LINK_DTSI}")
-            endif()  # dtbo generation - or copy        
-            # copy default shell.json if non-existing at ${CMAKE_BINARY_DIR}/shell.json
-            #   TODO: optionally pass a different shell.json as an argument
-            if ("${VITIS_KERNEL_AUX_SHELLJSON}" STREQUAL "")
-                run("cp ${FIRMWARE_DATA}/../shell.json \
-                    ${CMAKE_BINARY_DIR}/shell.json")
-            endif()  # shell.json
+        if(${NOKERNELS})
+            message(STATUS "No kernels built")
+        else()
+            # list all kernels
+            set(KERNELS_INCLUDE "")
+            foreach(include_item ${VITIS_LINK_KERNELS})
+                string(APPEND KERNELS_INCLUDE "${CMAKE_BINARY_DIR}/${include_item}.xo ")
+            endforeach()
             
-            # install Vitis AA artifacts
-            install(
-            FILES                
-                "${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.xclbin"
-                "${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.dtbo"
-                "${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.bit.bin"
-                "${CMAKE_BINARY_DIR}/shell.json"
-            DESTINATION
-                lib/${PROJECT_NAME}
-            )
-        endif()  # generate AA files
-        
+            # place and route
+            set(ENV{PLATFORM_REPO_PATHS} ${PLATFORM_REPO_PATHS})
+            set(CMD "${VPP_PATH} -l -t hw --config ${CMAKE_SOURCE_DIR}/${VITIS_LINK_CONFIG} ${KERNELS_INCLUDE} -o ${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.xclbin " )
+            # message(${CMD})
+            run(${CMD})
+            
+            # generate Vitis Accelerated Application (AA) files, if linking was successful
+            if (EXISTS "${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.xclbin")
+                ## extract the raw bitstream
+                run("xclbinutil --dump-section BITSTREAM:RAW:${VITIS_LINK_OUTPUT}.bit \
+                        --input ${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.xclbin --force")
+                # generate bif file
+                run("echo 'all:{${VITIS_LINK_OUTPUT}.bit}' > ${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.bif")
+                # generate .bit.bin file
+                run("bootgen -w -arch zynqmp -process_bitstream bin -image ${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.bif")
+                # generate or copy default dtbo
+                if ("${VITIS_LINK_DTSI}" STREQUAL "")
+                    run("cp ${FIRMWARE_DATA}/../device_tree/kernel_default.dtbo \
+                        ${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.dtbo")
+                else()
+                    run("dtc -I dts -O dtb -o ${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.dtbo \
+                        ${CMAKE_SOURCE_DIR}/${VITIS_LINK_DTSI}")
+                endif()  # dtbo generation - or copy        
+                # copy default shell.json if non-existing at ${CMAKE_BINARY_DIR}/shell.json
+                #   TODO: optionally pass a different shell.json as an argument
+                if ("${VITIS_KERNEL_AUX_SHELLJSON}" STREQUAL "")
+                    run("cp ${FIRMWARE_DATA}/../shell.json \
+                        ${CMAKE_BINARY_DIR}/shell.json")
+                endif()  # shell.json
+                
+                # install Vitis AA artifacts
+                install(
+                FILES                
+                    "${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.xclbin"
+                    "${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.dtbo"
+                    "${CMAKE_BINARY_DIR}/${VITIS_LINK_OUTPUT}.bit.bin"
+                    "${CMAKE_BINARY_DIR}/shell.json"
+                DESTINATION
+                    lib/${PROJECT_NAME}
+                )
+            endif()  # generate AA files
+        endif()  # NOKERNELS
     endif()  # cross compilation, DEFINED CMAKE_SYSROOT
 endmacro()  # vitis_acceleration_kernel
