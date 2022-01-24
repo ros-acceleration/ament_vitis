@@ -25,6 +25,7 @@ foreach(filename
                          #  see "vitis_hls_generate_tcl" macro
   "vitis_hls"
   "vitis_acceleration_kernel"
+  "vitis_link_kernel"
 )
   include(${ament_vitis_DIR}/${filename}.cmake)
 endforeach()

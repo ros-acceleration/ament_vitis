@@ -35,6 +35,9 @@
 # tree so that the corresponding acceleration kernel can operate appropriately.
 # :type target: string
 #
+# :param SHELLJSON (optional): describes the base shell configuration information
+# of the acceleration kernel. See https://github.com/Xilinx/dfx-mgr/tree/xlnx_rel_v2021.2#shelljson
+# :type target: string
 #
 # :param CLOCK: Frequency in Hz at which the kernel should be compiled by
 # Vitis HLS.
@@ -77,7 +80,7 @@
 #
 macro(vitis_acceleration_kernel)
     set(options PACKAGE LINK)
-    set(oneValueArgs NAME FILE CONFIG DTSI CLOCK)
+    set(oneValueArgs NAME FILE CONFIG DTSI SHELLJSON CLOCK)
     set(multiValueArgs TYPE INCLUDE)
 
     cmake_parse_arguments(VITIS_KERNEL "${options}" "${oneValueArgs}"
@@ -111,6 +114,7 @@ macro(vitis_acceleration_kernel)
             CLOCK ${VITIS_KERNEL_CLOCK}
             CONFIG ${VITIS_KERNEL_CONFIG}
             DTSI ${VITIS_KERNEL_DTSI}
+            SHELLJSON ${VITIS_KERNEL_SHELLJSON}
             INCLUDE ${VITIS_KERNEL_INCLUDE}
             LINK
             PACKAGE
@@ -123,6 +127,7 @@ macro(vitis_acceleration_kernel)
             CLOCK ${VITIS_KERNEL_CLOCK}
             CONFIG ${VITIS_KERNEL_CONFIG}
             DTSI ${VITIS_KERNEL_DTSI}
+            SHELLJSON ${VITIS_KERNEL_SHELLJSON}
             INCLUDE ${VITIS_KERNEL_INCLUDE}
             LINK
           )
@@ -134,6 +139,7 @@ macro(vitis_acceleration_kernel)
             CLOCK ${VITIS_KERNEL_CLOCK}
             CONFIG ${VITIS_KERNEL_CONFIG}
             DTSI ${VITIS_KERNEL_DTSI}
+            SHELLJSON ${VITIS_KERNEL_SHELLJSON}
             INCLUDE ${VITIS_KERNEL_INCLUDE}
             PACKAGE
           )
@@ -145,6 +151,7 @@ macro(vitis_acceleration_kernel)
             CLOCK ${VITIS_KERNEL_CLOCK}
             CONFIG ${VITIS_KERNEL_CONFIG}
             DTSI ${VITIS_KERNEL_DTSI}
+            SHELLJSON ${VITIS_KERNEL_SHELLJSON}
             INCLUDE ${VITIS_KERNEL_INCLUDE}
           )
         endif()
@@ -171,6 +178,10 @@ endmacro()  # vitis_acceleration_kernel
 # file for the kernel e.g. src/vadd_faster.dtsi.
 # :type target: string
 #
+# :param VITIS_KERNEL_AUX_SHELLJSON: CMAKE_SOURCE_DIR relative path to shell.json
+# file for the acceleration kernel e.g. src/shell.json.
+# :type target: string
+#
 # :param VITIS_KERNEL_AUX_CLOCK: Frequency in Hz at which the kernel should be
 # compiled by Vitis HLS.
 # See https://www.xilinx.com/html_docs/xilinx2020_2/vitis_doc/vitiscommandcompiler.html#mcj1568640526180__section_bh5_dg4_bjb
@@ -193,7 +204,7 @@ endmacro()  # vitis_acceleration_kernel
 macro(vitis_acceleration_kernel_aux)
   # arguments
   set(options PACKAGE LINK)
-  set(oneValueArgs NAME FILE CONFIG DTSI TYPE CLOCK)
+  set(oneValueArgs NAME FILE CONFIG DTSI SHELLJSON TYPE CLOCK)
   set(multiValueArgs INCLUDE)
   cmake_parse_arguments(VITIS_KERNEL_AUX "${options}" "${oneValueArgs}"
                         "${multiValueArgs}" ${ARGN} )
@@ -291,7 +302,7 @@ macro(vitis_acceleration_kernel_aux)
           COMMAND
             ln -s ${BINARY_NAME} ${VITIS_KERNEL_AUX_NAME}.xclbin
         )
-      endif()
+      endif() 
 
       # package
       #   only makes sense if linked already
@@ -345,15 +356,20 @@ macro(vitis_acceleration_kernel_aux)
       
       # generate or copy default dtbo
       if ("${VITIS_KERNEL_AUX_DTSI}" STREQUAL "")
-      run("cp ${FIRMWARE_DATA}/../device_tree/kernel_default.dtbo \
+        run("cp ${FIRMWARE_DATA}/../device_tree/kernel_default.dtbo \
               ${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.dtbo")
       else()
         run("dtc -I dts -O dtb -o ${CMAKE_BINARY_DIR}/${VITIS_KERNEL_AUX_NAME}.dtbo \
               ${CMAKE_SOURCE_DIR}/${VITIS_KERNEL_AUX_DTSI}")
       endif()  # dtbo generation - or copy
       
-      # generate shell.json
-      run("printf '{\n\t'\"'shell_type'\"' : '\"'XRT_FLAT'\"',\n\t'\"'num_slots'\"' : '\"'1'\"'\n}\n' > ${CMAKE_BINARY_DIR}/shell.json")
+      # copy default shell.json if non-existing at ${CMAKE_BINARY_DIR}/shell.json
+      #
+      # run("printf '{\n\t'\"'shell_type'\"' : '\"'XRT_FLAT'\"',\n\t'\"'num_slots'\"' : '\"'1'\"'\n}\n' > ${CMAKE_BINARY_DIR}/shell.json")  # bad, uses ', instead of "
+      if ("${VITIS_KERNEL_AUX_SHELLJSON}" STREQUAL "")
+        run("cp ${FIRMWARE_DATA}/../shell.json \
+              ${CMAKE_BINARY_DIR}/shell.json")
+      endif()  # shell.json
 
       # install
       if (EXISTS ${CMAKE_BINARY_DIR}/${BINARY_NAME})
