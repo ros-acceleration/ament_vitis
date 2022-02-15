@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
   <name>ament_vitis</name>
-  <version>0.8.0</version>
+  <version>0.9.0</version>
   <description>
     CMake macros and utilities to include Vitis platform into the ROS 2 build system (ament) and its development flows.
   </description>

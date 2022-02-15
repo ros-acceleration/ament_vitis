@@ -2,6 +2,11 @@
 Changelog for package ament_vitis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.9.0 (2022-02-15)
+------------------
+* Account for NOKERNELS CMake var.
+* Add vitis_link_kernel CMake macros
+
 0.8.0 (2022-01-21)
 ------------------
 * Refactor vitis_acceleration_kernel, add clock and link capabilities
