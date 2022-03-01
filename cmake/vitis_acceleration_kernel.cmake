@@ -243,7 +243,7 @@ macro(vitis_acceleration_kernel_aux)
     message(STATUS "No kernels built")
   else()
     # CMake configure time
-    
+
     # Build
     ## pass clock flag if available
     if ("${VITIS_KERNEL_AUX_CLOCK}" STREQUAL "")
@@ -272,7 +272,7 @@ macro(vitis_acceleration_kernel_aux)
       )
       # message("${VITIS_KERNEL_AUX_CLOCK}")  # debug
     endif()
-    message(STATUS "CMD_ERROR: " ${CMD_ERROR})
+    message(STATUS "CMD_ERROR: " ${CMD_ERROR})  # returns "0" if all good
 
     # adjust final binary name if not "hw" (only "hw" build target is without suffix)
     set(BINARY_NAME "${VITIS_KERNEL_AUX_NAME}.xclbin")
