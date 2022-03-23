@@ -2,8 +2,17 @@
 Changelog for package ament_vitis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.10.0 (2022-03-23)
+------------------
+* Prepare for release, change maintainer
+* Add usage examples
+* Enrich ROS_VITIS to be enabled only by VITIS hardware platforms
+* Add ROS_VITIS and ROS_XRT variables
+* Clarify output of message after operation
+
 0.9.0 (2022-02-15)
 ------------------
+* Release 0.9.0
 * Account for NOKERNELS CMake var.
 * Add vitis_link_kernel CMake macros
 

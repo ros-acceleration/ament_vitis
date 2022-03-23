@@ -4,6 +4,7 @@ project(ament_vitis NONE)
 
 find_package(ament_cmake_core REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
+find_package(ament_acceleration REQUIRED)
 
 ament_export_dependencies(ament_acceleration)
 
