@@ -395,19 +395,6 @@ macro(vitis_acceleration_kernel_aux)
 
           # if hw_emu, symlink to "sim" folder
           if (${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw_emu")
-            # # create emulation dir if it doesn't exist, then symlink which
-            # # this leads to various simlinks (as many as kernels) in a
-            # # compounded way. Not ideal. See below for an alternative that checks
-            #
-            # execute_process(
-            #   COMMAND
-            #     mkdir ${FIRMWARE_DATA}/../emulation
-            # )
-            # execute_process(
-            #   COMMAND
-            #     ln -s ${CMAKE_BINARY_DIR}/package/sim ${FIRMWARE_DATA}/../emulation/sim
-            # )
-
             set(EMULATIONSIMDIR "test -e ${FIRMWARE_DATA}/../emulation/sim || ")
             run("${EMULATIONSIMDIR} ln -s ${CMAKE_BINARY_DIR}/package/sim ${FIRMWARE_DATA}/../emulation/sim")
           endif()  # hw_emu
@@ -419,9 +406,7 @@ macro(vitis_acceleration_kernel_aux)
           if (${VITIS_KERNEL_AUX_TYPE} STREQUAL "hw")
             # if symlink exists, delete
             run("[ -L ${FIRMWARE_DATA}/../BOOT.BIN ] && unlink ${FIRMWARE_DATA}/../BOOT.BIN")
-            # set(EMULATIONSIMDIR "test -e ${FIRMWARE_DATA}/../BOOT.BIN || ")
-            # set(EMULATIONSIMDIR "[ -L ${FIRMWARE_DATA}/../BOOT.BIN ] && [ -e ${FIRMWARE_DATA}/../BOOT.BIN ]  && ")
-
+            
             # create the new symlink
             run("ln -s ${CMAKE_BINARY_DIR}/package/BOOT.BIN ${FIRMWARE_DATA}/../BOOT.BIN")
           endif()  # hw_emu
