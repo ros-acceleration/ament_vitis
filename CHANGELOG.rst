@@ -2,6 +2,10 @@
 Changelog for package ament_vitis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.0 (2022-06-27)
+------------------
+* Cleanup, release for Vitis 2022.1
+
 0.10.0 (2022-03-23)
 ------------------
 * Prepare for release, change maintainer
