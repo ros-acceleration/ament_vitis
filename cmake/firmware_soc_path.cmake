@@ -27,5 +27,7 @@
 set(FIRMWARE_SOC_PATH ${CMAKE_INSTALL_PREFIX}/../acceleration/firmware/select/SOC)
       # e.g. <ws>/acceleration/firmware/select/SOC
 
-file (STRINGS ${FIRMWARE_SOC_PATH} FIRMWARE_SOC)
+if(EXISTS ${FIRMWARE_SOC_PATH})
+      file (STRINGS ${FIRMWARE_SOC_PATH} FIRMWARE_SOC)
       # e.g. xcvu9p-flga2104-2-i
+endif()
